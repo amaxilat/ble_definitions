@@ -57,7 +57,7 @@ void setup() {
   pServer->setCallbacks(new MyServerCallbacks());
 
   // Create the BLE Service
-  BLEService *pService = pServer->createService(SERVICE_SENSORS_UUID);
+  BLEService *pService = pServer->createService(SERVICE_GENERIC_ATTRIBUTE_UUID);
 
   // Create a BLE Characteristic
   pCharacteristic = pService->createCharacteristic(
@@ -77,7 +77,7 @@ void setup() {
 
   // Start advertising
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID(SERVICE_SENSORS_UUID);
+  pAdvertising->addServiceUUID(SERVICE_GENERIC_ATTRIBUTE_UUID);
   pAdvertising->setScanResponse(false);
   pAdvertising->setMinPreferred(0x0);  // set value to 0x00 to not advertise this parameter
   BLEDevice::startAdvertising();
@@ -87,7 +87,9 @@ void setup() {
 void loop() {
     // notify changed value
     if (deviceConnected) {
-        pCharacteristic->setValue((uint8_t*)&value, 4);
+        char sensorStrValue[10];
+        sprintf(sensorStrValue, "%d", value);
+        pCharacteristic->setValue(sensorStrValue);
         pCharacteristic->notify();
         value++;
         delay(3); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
